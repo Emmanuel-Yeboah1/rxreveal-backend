@@ -1,0 +1,18 @@
+# Virtual environment -- machine-specific, never commit this
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Downloaded dataset cache (TDC re-downloads this automatically on first run)
+data/
+
+# Trained model weights -- optional to exclude; see note below.
+# Comment this line out if you WANT the trained weights in the repo
+# (useful so your partner doesn't have to retrain from scratch).
+# gnn_model_weights.pt
+
+# OS-specific junk
+.DS_Store
+Thumbs.db
