@@ -33,7 +33,7 @@ from torch_geometric.data import Batch
 
 from audio_convert import convert_to_wav
 from data_processing import smiles_to_graph
-from drug_lookup import extract_drug_name_from_ocr, name_to_smiles
+from drug_lookup import extract_drug_name_from_ocr, name_to_smiles, search_drug_names
 from gnn_model import DrugPairInteractionModel, molgraph_to_pyg_data
 from ocr_reader import extract_text_lines
 from speech_to_text import transcribe_audio
@@ -76,6 +76,19 @@ class PredictionResponse(BaseModel):
 def root():
     """Basic health check -- confirms the API is running."""
     return {"status": "RxReveal API is running"}
+
+
+@app.get("/drugs/search")
+def search_drugs(q: str):
+    """
+    Live autocomplete search for drug names -- powers a search-as-you-type
+    dropdown on the frontend. Returns a plain list of matching drug name
+    strings for the given partial query.
+
+    Example: GET /drugs/search?q=para -> ["Paracetamol", "Paracoumarin", ...]
+    """
+    suggestions = search_drug_names(q)
+    return {"suggestions": suggestions}
 
 
 def resolve_to_smiles(value: str) -> str:

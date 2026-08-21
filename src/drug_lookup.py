@@ -31,6 +31,31 @@ def clean_ocr_text(raw_text: str) -> str:
     return text.strip()
 
 
+def search_drug_names(partial_name: str, limit: int = 8) -> list[str]:
+    """
+    Return a LIST of drug name suggestions matching a partial/in-progress
+    search string -- for a live autocomplete dropdown as the user types
+    (e.g. "para" -> ["Paracetamol", "Paracoumarin", ...]).
+
+    Different from autocomplete_drug_name() above, which returns just
+    the single best correction for a likely-misspelled full name.
+    """
+    if not partial_name or len(partial_name) < 2:
+        # Querying PubChem on 1 character returns huge, unhelpful results.
+        return []
+
+    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/autocomplete/compound/{partial_name}/json"
+    try:
+        response = requests.get(url, params={"limit": limit}, timeout=10)
+        if response.status_code != 200:
+            return []
+        data = response.json()
+        return data.get("dictionary_terms", {}).get("compound", [])
+    except (requests.RequestException, KeyError, ValueError) as e:
+        print(f"[drug_lookup] Search failed for {partial_name!r}: {e}")
+        return []
+
+
 def autocomplete_drug_name(partial_name: str) -> str | None:
     """
     Use PubChem's autocomplete endpoint to find the closest real
